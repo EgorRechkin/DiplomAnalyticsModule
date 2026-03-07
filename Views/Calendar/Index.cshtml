@@ -1,0 +1,123 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model AnalyticsModuleDiplomMVC.Controllers.CalendarViewModel
+
+@{
+    ViewData["Title"] = "Календарь посещаемости";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Календарь посещаемости: @Model.Employee.FullName</h2>
+            <div class="card">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <form asp-action="Index" method="get">
+                                <div class="input-group">
+                                    <select class="form-select" name="employeeId" id="employeeSelect">
+                                        @foreach (var emp in Model.Employees)
+                                        {
+                                            <option value="@emp.Id"
+                                                    @if (emp.Id == Model.Employee.Id)
+                                                    {
+                                                        <text>selected</text>
+                                                    }>
+                                                @emp.FullName
+                                            </option>
+                                        }
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <input type="date" class="form-control" id="dateFilter">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Дата</th>
+                                    <th>Время прихода</th>
+                                    <th>Время ухода</th>
+                                    <th>Статус</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var record in Model.Records)
+                                {
+                                    <tr class="record-row" data-date="@record.Date.ToString("yyyy-MM-dd")">
+                                        <td>@record.Date.ToShortDateString()</td>
+                                        <td>
+                                            @if (record.ArrivalTime.HasValue)
+                                            {
+                                                @record.ArrivalTime.Value.ToShortTimeString()
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">Пропуск</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (record.DepartureTime.HasValue)
+                                            {
+                                                @record.DepartureTime.Value.ToShortTimeString()
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">Пропуск</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (record.Status == AttendanceStatus.Late)
+                                            {
+                                                <span class="badge bg-warning">Опоздание</span>
+                                            }
+                                            else if (record.Status == AttendanceStatus.Overwork)
+                                            {
+                                                <span class="badge bg-success">Переработка</span>
+                                            }
+                                            else if (record.Status == AttendanceStatus.Absent)
+                                            {
+                                                <span class="badge bg-danger">Пропуск</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-primary">Норма</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateFilter = document.getElementById('dateFilter');
+            const recordRows = document.querySelectorAll('.record-row');
+
+            dateFilter.addEventListener('change', function() {
+                const selectedDate = this.value;
+                recordRows.forEach(row => {
+                    if (selectedDate === "" || row.getAttribute('data-date') === selectedDate) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+}

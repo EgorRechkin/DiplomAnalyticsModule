@@ -1,0 +1,47 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model List<AnalyticsModuleDiplomMVC.Controllers.EmployeeReportViewModel>
+
+@{
+    ViewData["Title"] = "Отчеты";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Отчеты</h2>
+            <div class="card">
+                <div class="card-header">
+                    <h4>Отчет по рабочему времени</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <a asp-action="GenerateReport" class="btn btn-success">Сгенерировать отчет</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>ФИО</th>
+                                    <th>Отработано часов</th>
+                                    <th>Переработка</th>
+                                    <th>Опоздания</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.Employee.FullName</td>
+                                        <td>@item.TotalHours.ToString("F1")</td>
+                                        <td>@item.OverworkHours.ToString("F1")</td>
+                                        <td>@item.LateArrivals</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
