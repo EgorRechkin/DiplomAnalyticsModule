@@ -71,7 +71,49 @@ public class AnalyticsController : Controller
 
         return View("Reports", reportData);
     }
+    public IActionResult AttendanceChart()
+    {
+        var employees = _mockDataService.Employees;
+        var attendanceRecords = _mockDataService.AttendanceRecords;
+
+        // Группируем данные по датам и рассчитываем общее количество отработанных часов в день
+        var attendanceByDate = attendanceRecords
+            .Where(r => r.ArrivalTime.HasValue && r.DepartureTime.HasValue)
+            .GroupBy(r => r.Date)
+            .Select(g => new
+            {
+                Date = g.Key.ToString("yyyy-MM-dd"),
+                TotalHours = g.Sum(r => (r.DepartureTime.Value - r.ArrivalTime.Value).TotalHours),
+                EmployeeCount = g.Select(r => r.EmployeeId).Distinct().Count()
+            })
+            .OrderBy(r => r.Date)
+            .ToList();
+
+        var dates = attendanceByDate.Select(r => r.Date).ToList();
+        var totalHours = attendanceByDate.Select(r => r.TotalHours).ToList();
+        var employeeCounts = attendanceByDate.Select(r => r.EmployeeCount).ToList();
+
+        var model = new AttendanceChartViewModel
+        {
+            Dates = dates,
+            TotalHours = totalHours,
+            EmployeeCounts = employeeCounts
+        };
+
+        return View(model);
+    }
+
+
 }
+
+public class AttendanceChartViewModel
+{
+    public List<string> Dates { get; set; }
+    public List<double> TotalHours { get; set; }
+    public List<int> EmployeeCounts { get; set; }
+}
+
+
 
 public class AnalyticsViewModel
 {

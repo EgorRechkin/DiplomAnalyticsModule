@@ -1,0 +1,110 @@
+﻿@model AnalyticsModuleDiplomMVC.Controllers.AttendanceChartViewModel
+
+@{
+    ViewData["Title"] = "График посещаемости всех сотрудников";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>График посещаемости всех сотрудников</h2>
+            <!-- График отработанных часов -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>Общее количество отработанных часов</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="totalAttendanceChart" height="100"></canvas>
+                </div>
+            </div>
+            <!-- График количества сотрудников -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>Количество сотрудников, пришедших на работу</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="employeeCountChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var dates = @Html.Raw(Json.Serialize(Model.Dates));
+            var totalHours = @Html.Raw(Json.Serialize(Model.TotalHours));
+            var employeeCounts = @Html.Raw(Json.Serialize(Model.EmployeeCounts));
+
+            // График отработанных часов
+            var ctxHours = document.getElementById('totalAttendanceChart').getContext('2d');
+            var totalAttendanceChart = new Chart(ctxHours, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Общее количество отработанных часов',
+                        data: totalHours,
+                        borderColor: 'rgb(54, 162, 235)',
+                        tension: 0.1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Часы'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Дата'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // График количества сотрудников
+            var ctxCounts = document.getElementById('employeeCountChart').getContext('2d');
+            var employeeCountChart = new Chart(ctxCounts, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Количество сотрудников, пришедших на работу',
+                        data: employeeCounts,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Количество сотрудников'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Дата'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}

@@ -6,6 +6,7 @@
 }
 
 <div class="container-fluid">
+    <!-- Выбор сотрудника -->
     <div class="row">
         <div class="col-md-12">
             <h2>Календарь посещаемости: @Model.Employee.FullName</h2>
@@ -15,16 +16,10 @@
                         <div class="col-md-6">
                             <form asp-action="Index" method="get">
                                 <div class="input-group">
-                                    <select class="form-select" name="employeeId" id="employeeSelect">
+                                    <select class="form-select" name="employeeId" id="employeeSelect" onchange="this.form.submit()">
                                         @foreach (var emp in Model.Employees)
                                         {
-                                            <option value="@emp.Id"
-                                                    @if (emp.Id == Model.Employee.Id)
-                                                    {
-                                                        <text>selected</text>
-                                                    }>
-                                                @emp.FullName
-                                            </option>
+                                            <option value="@emp.Id">@emp.FullName</option>
                                         }
                                     </select>
                                 </div>
@@ -37,6 +32,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- Таблица посещаемости -->
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-bordered">
@@ -100,23 +96,119 @@
             </div>
         </div>
     </div>
+
+    <!-- Индивидуальный дашборд -->
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Индивидуальный дашборд за месяц</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card text-white bg-primary mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Отработано часов</h5>
+                                    <p class="card-text">@Model.TotalHoursWorked.ToString("F1")</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-white bg-warning mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Опозданий</h5>
+                                    <p class="card-text">@Model.TotalLateArrivals</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-white bg-success mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Переработок</h5>
+                                    <p class="card-text">@Model.TotalOverworks</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-white bg-danger mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Пропусков</h5>
+                                    <p class="card-text">@Model.TotalAbsences</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- График посещаемости -->
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>График отработанных часов: @Model.Employee.FullName</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="attendanceChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const dateFilter = document.getElementById('dateFilter');
-            const recordRows = document.querySelectorAll('.record-row');
+            // Установка выбранного сотрудника в select
+            var employeeSelect = document.getElementById('employeeSelect');
+            var selectedEmployeeId = @Model.Employee.Id;
+            for (var i = 0; i < employeeSelect.options.length; i++) {
+                if (employeeSelect.options[i].value == selectedEmployeeId) {
+                    employeeSelect.selectedIndex = i;
+                    break;
+                }
+            }
 
-            dateFilter.addEventListener('change', function() {
-                const selectedDate = this.value;
-                recordRows.forEach(row => {
-                    if (selectedDate === "" || row.getAttribute('data-date') === selectedDate) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
+            // Построение графика посещаемости
+            var dates = @Html.Raw(Json.Serialize(Model.Dates));
+            var hoursWorked = @Html.Raw(Json.Serialize(Model.HoursWorked));
+
+            var ctx = document.getElementById('attendanceChart').getContext('2d');
+            var attendanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Отработанные часы',
+                        data: hoursWorked,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Часы'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Дата'
+                            }
+                        }
                     }
-                });
+                }
             });
         });
     </script>

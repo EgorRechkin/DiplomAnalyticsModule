@@ -28,3 +28,4 @@ C:\Users\Egor\RiderProjects\AnalyticsModuleDiplomMVC\AnalyticsModuleDiplomMVC\ob
 C:\Users\Egor\RiderProjects\AnalyticsModuleDiplomMVC\AnalyticsModuleDiplomMVC\obj\Debug\net8.0\AnalyticsModuleDiplomMVC.pdb
 C:\Users\Egor\RiderProjects\AnalyticsModuleDiplomMVC\AnalyticsModuleDiplomMVC\obj\Debug\net8.0\AnalyticsModuleDiplomMVC.genruntimeconfig.cache
 C:\Users\Egor\RiderProjects\AnalyticsModuleDiplomMVC\AnalyticsModuleDiplomMVC\obj\Debug\net8.0\ref\AnalyticsModuleDiplomMVC.dll
+C:\Users\Egor\RiderProjects\AnalyticsModuleDiplomMVC\AnalyticsModuleDiplomMVC\obj\Debug\net8.0\AnalyticsModuleDiplomMVC.sourcelink.json
