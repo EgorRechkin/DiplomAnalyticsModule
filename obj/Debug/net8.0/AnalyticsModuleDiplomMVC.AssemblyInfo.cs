@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AnalyticsModuleDiplomMVC")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+26b153784c7642a378224ab868fbc8c86770ce10")]
 [assembly: System.Reflection.AssemblyProductAttribute("AnalyticsModuleDiplomMVC")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AnalyticsModuleDiplomMVC")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

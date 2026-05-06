@@ -2,8 +2,8 @@
 
 public class AttendanceRecord
 {
-    public int Id { get; set; }
-    public int EmployeeId { get; set; }
+    public string Id { get; set; }
+    public string EmployeeId { get; set; }
     public DateTime Date { get; set; }
     public DateTime? ArrivalTime { get; set; }
     public DateTime? DepartureTime { get; set; }

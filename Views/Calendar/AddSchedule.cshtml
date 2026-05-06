@@ -1,0 +1,225 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model AnalyticsModuleDiplomMVC.Controllers.WorkScheduleViewModel
+
+@{
+    ViewData["Title"] = "Добавить расписание";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-success text-white">
+                    <h1 class="mb-0 h4">
+                        <i class="fas fa-clock me-2"></i>Добавить расписание работы
+                    </h1>
+                </div>
+                
+                <div class="card-body">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong><i class="fas fa-exclamation-circle me-2"></i>Ошибка!</strong>
+                            <ul class="mb-0 mt-2">
+                                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form method="post" asp-action="AddSchedule" class="needs-validation" novalidate>
+                        <input type="hidden" name="EmployeeName" value="@Model.EmployeeName" />
+                        <!-- Выбор сотрудника -->
+                        <div class="mb-4">
+                            <label for="employeeId" class="form-label">
+                                <i class="fas fa-user me-1"></i>Сотрудник
+                                <span class="badge bg-danger">обязательно</span>
+                            </label>
+                            <select class="form-select" id="employeeId" name="EmployeeId" required>
+                                <option value="">-- Выберите сотрудника --</option>
+                                @foreach (var emp in Model.Employees)
+                                {
+                                    <option value="@emp.Id" selected="@(emp.Id == Model.EmployeeId)">
+                                        @emp.FullName
+                                    </option>
+                                }
+                            </select>
+                            <small class="form-text text-muted d-block mt-2">
+                                ✓ Выберите сотрудника для добавления расписания
+                            </small>
+                        </div>
+
+                        <!-- Тип графика -->
+                        <div class="mb-4">
+                            <label for="shiftType" class="form-label">
+                                <i class="fas fa-exchange-alt me-1"></i>Тип смены
+                                <span class="badge bg-danger">обязательно</span>
+                            </label>
+                            <select class="form-select" id="shiftType" name="ShiftType" required>
+                                <option value="">-- Выберите тип смены --</option>
+                                <option value="День" selected="@(Model.ShiftType == "День")">
+                                    <i class="fas fa-sun"></i> День
+                                </option>
+                                <option value="Ночь" selected="@(Model.ShiftType == "Ночь")">
+                                    <i class="fas fa-moon"></i> Ночь
+                                </option>
+                                <option value="Скользящий" selected="@(Model.ShiftType == "Скользящий")">
+                                    <i class="fas fa-random"></i> Скользящий
+                                </option>
+                            </select>
+                            <small class="form-text text-muted d-block mt-2">
+                                ✓ Выберите тип рабочей смены
+                            </small>
+                        </div>
+
+                        <!-- Время начала -->
+                        <div class="mb-4">
+                            <label for="startTime" class="form-label">
+                                <i class="fas fa-play-circle me-1"></i>Начало рабочей смены
+                                <span class="badge bg-danger">обязательно</span>
+                            </label>
+                            <input
+                                type="time"
+                                class="form-control"
+                                id="startTime"
+                                name="StartTime"
+                                value="@Model.StartTime"
+                                required>
+                            <small class="form-text text-muted d-block mt-2">
+                                ✓ Укажите время начала смены (например: 09:00)
+                            </small>
+                        </div>
+
+                        <!-- Время окончания -->
+                        <div class="mb-4">
+                            <label for="endTime" class="form-label">
+                                <i class="fas fa-stop-circle me-1"></i>Окончание рабочей смены
+                                <span class="badge bg-danger">обязательно</span>
+                            </label>
+                            <input
+                                type="time"
+                                class="form-control"
+                                id="endTime"
+                                name="EndTime"
+                                value="@Model.EndTime"
+                                required>
+                            <small class="form-text text-muted d-block mt-2">
+                                ✓ Укажите время окончания смены (например: 18:00)
+                            </small>
+                        </div>
+
+                        <!-- Количество рабочих дней -->
+                        <div class="mb-4">
+                            <label for="workingDays" class="form-label">
+                                <i class="fas fa-calendar-day me-1"></i>Количество рабочих дней
+                                <span class="badge bg-danger">обязательно</span>
+                            </label>
+                            <input
+                                type="number"
+                                class="form-control"
+                                id="workingDays"
+                                name="WorkingDays"
+                                value="@Model.WorkingDays"
+                                min="1"
+                                max="7"
+                                required>
+                            <small class="form-text text-muted d-block mt-2">
+                                ✓ Количество рабочих дней в неделю (1-7)
+                            </small>
+                        </div>
+
+                        <!-- Количество выходных дней -->
+                        <div class="mb-4">
+                            <label for="daysOff" class="form-label">
+                                <i class="fas fa-calendar-times me-1"></i>Количество выходных дней
+                                <span class="badge bg-danger">обязательно</span>
+                            </label>
+                            <input
+                                type="number"
+                                class="form-control"
+                                id="daysOff"
+                                name="DaysOff"
+                                value="@Model.DaysOff"
+                                min="0"
+                                max="7"
+                                required>
+                            <small class="form-text text-muted d-block mt-2">
+                                ✓ Количество выходных дней в неделю (0-7)
+                            </small>
+                        </div>
+
+                        <!-- Кнопки -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end pt-3">
+                            <a asp-action="Index" asp-route-employeeId="@Model.EmployeeId" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-times me-2"></i>Отмена
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-check me-2"></i>Добавить расписание
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Справка -->
+            <div class="mt-4 p-3 bg-light rounded">
+                <h6 class="mb-3"><i class="fas fa-info-circle me-2"></i>Справка</h6>
+                <ul class="small mb-0">
+                    <li><strong>День:</strong> обычная дневная смена (пример: 09:00 - 18:00)</li>
+                    <li><strong>Ночь:</strong> ночная смена (пример: 21:00 - 06:00)</li>
+                    <li><strong>Скользящий:</strong> переменное расписание</li>
+                    <li class="mt-2"><strong>Рабочие дни:</strong> сколько дней в неделю работает</li>
+                    <li><strong>Выходные дни:</strong> сколько дней отдыхает</li>
+                    <li class="mt-2"><strong>*</strong> - обязательные поля</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        border: none;
+        padding: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.75rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+
+    .btn {
+        border-radius: 6px;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+</style>

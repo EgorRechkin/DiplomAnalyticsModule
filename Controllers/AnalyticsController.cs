@@ -9,74 +9,42 @@ using System.Linq;
 
 public class AnalyticsController : Controller
 {
-    private readonly MockDataService _mockDataService;
+    private readonly DataService _dataService;
 
-    public AnalyticsController()
+    public AnalyticsController(DataService dataService)
     {
-        _mockDataService = new MockDataService();
+        _dataService = dataService;
     }
 
     public IActionResult Index()
     {
+        if (!_dataService.IsDatabaseConnected())
+        {
+            ViewBag.ConnectionError = "Не удалось подключиться к базе данных. Проверьте настройки подключения.";
+            return View(new AnalyticsViewModel());
+        }
+
         var model = new AnalyticsViewModel
         {
-            Employees = _mockDataService.Employees,
-            AttendanceMarks = _mockDataService.AttendanceMarks,
-            WorkSchedules = _mockDataService.WorkSchedules,
-            ActionLogs = _mockDataService.ActionLogs
+            Employees = _dataService.Employees,
+            AttendanceMarks = _dataService.AttendanceRecords,
+            WorkSchedules = _dataService.WorkSchedules,
+            ActionLogs = _dataService.ActionLogs
         };
         return View(model);
     }
 
-    [HttpPost]
-    public IActionResult AddManualMark(int employeeId, DateTime date, DateTime arrivalTime, DateTime departureTime)
-    {
-        var newMark = new AttendanceMark
-        {
-            Id = _mockDataService.AttendanceMarks.Max(m => m.Id) + 1,
-            EmployeeId = employeeId,
-            Date = date,
-            ArrivalTime = arrivalTime,
-            DepartureTime = departureTime,
-            Status = "Ручная отметка"
-        };
-
-        _mockDataService.AttendanceMarks.Add(newMark);
-
-        _mockDataService.ActionLogs.Add(new ActionLog
-        {
-            Id = _mockDataService.ActionLogs.Count + 1,
-            ActionDate = DateTime.Now,
-            ActionType = "Добавление отметки",
-            User = "Руководитель",
-            Description = $"Добавлена отметка для сотрудника {employeeId}"
-        });
-
-        return RedirectToAction("Index");
-    }
-
-
-    public IActionResult GenerateReport()
-    {
-        var reportData = _mockDataService.AttendanceMarks
-            .GroupBy(m => m.EmployeeId)
-            .Select(g => new EmployeeReportViewModel
-            {
-                Employee = _mockDataService.Employees.First(e => e.Id == g.Key),
-                TotalHours = g.Sum(m => (m.DepartureTime - m.ArrivalTime).TotalHours),
-                OverworkHours = g.Where(m => m.Status == "Переработка").Sum(m => (m.DepartureTime - m.ArrivalTime).TotalHours - 8),
-                LateArrivals = g.Count(m => m.Status == "Опоздание")
-            })
-            .ToList();
-
-        return View("Reports", reportData);
-    }
     public IActionResult AttendanceChart()
     {
-        var employees = _mockDataService.Employees;
-        var attendanceRecords = _mockDataService.AttendanceRecords;
+        if (!_dataService.IsDatabaseConnected())
+        {
+            ViewBag.ConnectionError = "Не удалось подключиться к базе данных. Проверьте настройки подключения.";
+            return View(new AttendanceChartViewModel());
+        }
 
-        // Группируем данные по датам и рассчитываем общее количество отработанных часов в день
+        var employees = _dataService.Employees;
+        var attendanceRecords = _dataService.AttendanceRecords;
+
         var attendanceByDate = attendanceRecords
             .Where(r => r.ArrivalTime.HasValue && r.DepartureTime.HasValue)
             .GroupBy(r => r.Date)
@@ -102,9 +70,8 @@ public class AnalyticsController : Controller
 
         return View(model);
     }
-
-
 }
+
 
 public class AttendanceChartViewModel
 {
@@ -118,7 +85,7 @@ public class AttendanceChartViewModel
 public class AnalyticsViewModel
 {
     public List<Employee> Employees { get; set; }
-    public List<AttendanceMark> AttendanceMarks { get; set; }
+    public List<AttendanceRecord> AttendanceMarks { get; set; }
     public List<WorkSchedule> WorkSchedules { get; set; }
     public List<ActionLog> ActionLogs { get; set; }
 }

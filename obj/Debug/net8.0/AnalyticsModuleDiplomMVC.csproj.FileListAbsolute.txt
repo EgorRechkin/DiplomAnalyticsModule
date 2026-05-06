@@ -29,3 +29,7 @@ C:\Users\Egor\RiderProjects\AnalyticsModuleDiplomMVC\AnalyticsModuleDiplomMVC\ob
 C:\Users\Egor\RiderProjects\AnalyticsModuleDiplomMVC\AnalyticsModuleDiplomMVC\obj\Debug\net8.0\AnalyticsModuleDiplomMVC.genruntimeconfig.cache
 C:\Users\Egor\RiderProjects\AnalyticsModuleDiplomMVC\AnalyticsModuleDiplomMVC\obj\Debug\net8.0\ref\AnalyticsModuleDiplomMVC.dll
 C:\Users\Egor\RiderProjects\AnalyticsModuleDiplomMVC\AnalyticsModuleDiplomMVC\obj\Debug\net8.0\AnalyticsModuleDiplomMVC.sourcelink.json
+C:\Users\Egor\RiderProjects\AnalyticsModuleDiplomMVC\AnalyticsModuleDiplomMVC\obj\Debug\net8.0\AnalyticsModuleDiplomMVC.csproj.AssemblyReference.cache
+C:\Users\Egor\RiderProjects\AnalyticsModuleDiplomMVC\AnalyticsModuleDiplomMVC\bin\Debug\net8.0\Npgsql.dll
+C:\Users\Egor\RiderProjects\AnalyticsModuleDiplomMVC\AnalyticsModuleDiplomMVC\bin\Debug\net8.0\System.Diagnostics.DiagnosticSource.dll
+C:\Users\Egor\RiderProjects\AnalyticsModuleDiplomMVC\AnalyticsModuleDiplomMVC\obj\Debug\net8.0\AnalyticsModuleDiplomMVC.csproj.CopyComplete

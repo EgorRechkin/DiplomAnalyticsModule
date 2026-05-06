@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using AnalyticsModuleDiplomMVC.Models;
+using AnalyticsModuleDiplomMVC.Services;
 
 namespace AnalyticsModuleDiplomMVC.Controllers;
 
@@ -8,9 +9,12 @@ public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
 
-    public HomeController(ILogger<HomeController> logger)
+    private readonly DataService _dataService;
+ 
+    public HomeController(ILogger<HomeController> logger, DataService dataService)
     {
         _logger = logger;
+        _dataService = dataService;
     }
 
     public IActionResult Index()

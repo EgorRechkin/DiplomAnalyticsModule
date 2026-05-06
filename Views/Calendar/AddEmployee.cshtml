@@ -1,0 +1,198 @@
+﻿@model Employee
+
+@{
+    ViewData["Title"] = "Добавить сотрудника";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="mb-0 h4">
+                        <i class="fas fa-user-plus me-2"></i>Добавить нового сотрудника
+                    </h1>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Вывод ошибок валидации -->
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>
+                                <i class="fas fa-exclamation-circle me-2"></i>Ошибка валидации!
+                            </strong>
+                            <p class="mb-2">Пожалуйста, проверьте введенные данные:</p>
+                            <ul class="mb-0">
+                                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <form method="post" asp-action="AddEmployee" class="needs-validation" novalidate>
+                        <!-- Поле ФИО -->
+                        <div class="mb-4">
+                            <label for="fullName" class="form-label">
+                                <i class="fas fa-id-card me-1"></i>ФИО сотрудника 
+                                <span class="badge bg-danger">обязательно</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                class="form-control @(ViewData.ModelState["FullName"]?.ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid ? "is-invalid" : "")" 
+                                id="fullName" 
+                                name="FullName" 
+                                placeholder="Например: Иванов Иван Иванович" 
+                                value="@Model?.FullName" 
+                                required
+                                minlength="3"
+                                maxlength="255">
+                            <small class="form-text text-muted d-block mt-2">
+                                ✓ Введите полное имя сотрудника (минимум 3 символа)
+                            </small>
+                        </div>
+
+                        <!-- Поле Должность -->
+                        <div class="mb-4">
+                            <label for="position" class="form-label">
+                                <i class="fas fa-briefcase me-1"></i>Должность 
+                                <span class="badge bg-danger">обязательно</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                class="form-control @(ViewData.ModelState["Position"]?.ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid ? "is-invalid" : "")" 
+                                id="position" 
+                                name="Position" 
+                                placeholder="Например: Менеджер" 
+                                value="@Model?.Position" 
+                                required
+                                maxlength="100">
+                            <small class="form-text text-muted d-block mt-2">
+                                ✓ Примеры: Менеджер, Инженер, Бухгалтер, Разработчик, Аналитик
+                            </small>
+                        </div>
+
+                        <!-- Поле Отдел -->
+                        <div class="mb-4">
+                            <label for="department" class="form-label">
+                                <i class="fas fa-sitemap me-1"></i>Отдел 
+                                <span class="badge bg-danger">обязательно</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                class="form-control @(ViewData.ModelState["Department"]?.ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid ? "is-invalid" : "")" 
+                                id="department" 
+                                name="Department" 
+                                placeholder="Например: Отдел продаж" 
+                                value="@Model?.Department" 
+                                required
+                                maxlength="100">
+                            <small class="form-text text-muted d-block mt-2">
+                                ✓ Примеры: Отдел продаж, Производство, Финансы, IT, HR
+                            </small>
+                        </div>
+
+                        <!-- Кнопки -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end pt-3">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-times me-2"></i>Отмена
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-check me-2"></i>Добавить сотрудника
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Справочная информация -->
+            <div class="mt-4 p-3 bg-light rounded">
+                <h6 class="mb-3">
+                    <i class="fas fa-info-circle me-2"></i>Справка
+                </h6>
+                <ul class="small mb-0">
+                    <li><strong>ФИО:</strong> полное имя сотрудника (3-255 символов)</li>
+                    <li><strong>Должность:</strong> текущая должность сотрудника</li>
+                    <li><strong>Отдел:</strong> отдел, в котором работает сотрудник</li>
+                    <li><strong class="text-danger">*</strong> - обязательные поля</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        border: none;
+        padding: 1.5rem;
+    }
+
+    .card-header h1 {
+        margin: 0;
+        font-weight: 600;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.75rem;
+    }
+
+    .form-control {
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .form-control.is-invalid {
+        border-color: #dc3545;
+    }
+
+    .form-control.is-invalid:focus {
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .badge {
+        font-size: 0.7rem;
+        padding: 0.35em 0.65em;
+    }
+
+    .btn {
+        border-radius: 6px;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-outline-secondary:hover {
+        transform: translateY(-2px);
+    }
+</style>

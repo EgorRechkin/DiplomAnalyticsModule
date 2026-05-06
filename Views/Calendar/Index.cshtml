@@ -5,87 +5,183 @@
     ViewData["Title"] = "Календарь посещаемости";
 }
 
-<div class="container-fluid">
-    <!-- Выбор сотрудника -->
+<div class="container-fluid mt-4">
+    <!-- Успешное сообщение -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong><i class="fas fa-check-circle me-2"></i>Успешно!</strong> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
     <div class="row">
-        <div class="col-md-12">
-            <h2>Календарь посещаемости: @Model.Employee.FullName</h2>
-            <div class="card">
-                <div class="card-header">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <form asp-action="Index" method="get">
-                                <div class="input-group">
-                                    <select class="form-select" name="employeeId" id="employeeSelect" onchange="this.form.submit()">
-                                        @foreach (var emp in Model.Employees)
-                                        {
-                                            <option value="@emp.Id">@emp.FullName</option>
-                                        }
-                                    </select>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <input type="date" class="form-control" id="dateFilter">
-                            </div>
-                        </div>
+        <!-- Левая колонка: Информация сотрудника и расписание -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user me-2"></i>Информация о сотруднике
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Выберите сотрудника:</strong></label>
+                        <select class="form-select" onchange="location.href='@Url.Action("Index", "Calendar")?employeeId=' + this.value;">
+                            @foreach (var emp in Model.Employees)
+                            {
+                                <option value="@emp.Id" selected="@(emp.Id == Model.Employee.Id)">
+                                    @emp.FullName
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="employee-info">
+                        <p><strong>ФИО:</strong> @Model.Employee.FullName</p>
+                        <p><strong>Должность:</strong> @Model.Employee.Position</p>
+                        <p><strong>Отдел:</strong> @Model.Employee.Department</p>
+                    </div>
+
+                    <hr>
+
+                    <!-- Статистика -->
+                    <h6 class="mb-3"><i class="fas fa-chart-pie me-2"></i>Статистика</h6>
+                    <div class="stat-item mb-2">
+                        <strong>Всего часов:</strong> 
+                        <span class="badge bg-info">@Model.TotalHoursWorked.ToString("F1")</span>
+                    </div>
+                    <div class="stat-item mb-2">
+                        <strong>Опоздания:</strong> 
+                        <span class="badge bg-warning">@Model.TotalLateArrivals</span>
+                    </div>
+                    <div class="stat-item mb-2">
+                        <strong>Переработки:</strong> 
+                        <span class="badge bg-success">@Model.TotalOverworks</span>
+                    </div>
+                    <div class="stat-item">
+                        <strong>Отсутствия:</strong> 
+                        <span class="badge bg-danger">@Model.TotalAbsences</span>
                     </div>
                 </div>
-                <!-- Таблица посещаемости -->
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3">
+                <!-- Кнопка добавления расписания -->
+                <a asp-action="AddSchedule" asp-route-employeeId="@Model.Employee.Id" class="btn btn-success btn-lg w-100 mb-3">
+                    <i class="fas fa-plus me-2"></i>Добавить расписание
+                </a>
+                
+                <a asp-action="AddEmployee" class="btn btn-success btn-lg w-100 h-100 d-flex align-items-center justify-content-center flex-column py-4">
+                    <i class="fas fa-user-plus mb-2"></i>
+                    <span>Добавить<br/>сотрудника</span>
+                </a>
+            </div>
+
+            <!-- Текущее расписание -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clock me-2"></i>Текущее расписание
+                    </h5>
+                </div>
                 <div class="card-body">
+                    @if (Model.Records.Any())
+                    {
+                        var lastRecord = Model.Records.OrderByDescending(r => r.Date).FirstOrDefault();
+                        @if (lastRecord?.ArrivalTime.HasValue == true)
+                        {
+                            <p><strong>Начало:</strong> @lastRecord.ArrivalTime.Value.ToString("HH:mm")</p>
+                            <p><strong>Конец:</strong> @lastRecord.DepartureTime?.ToString("HH:mm")</p>
+                        }
+                        else
+                        {
+                            <p class="text-muted">Данные о времени отсутствуют</p>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted">Нет данных о расписании</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Правая колонка: График и список записей -->
+        <div class="col-lg-8">
+            <!-- График посещаемости -->
+            @if (Model.HoursWorked.Any())
+            {
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>График часов работы
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="attendanceChart"></canvas>
+                    </div>
+                </div>
+            }
+
+            <!-- Таблица записей -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>История посещаемости
+                    </h5>
+                </div>
+                <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead>
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
                                 <tr>
                                     <th>Дата</th>
-                                    <th>Время прихода</th>
-                                    <th>Время ухода</th>
+                                    <th>Начало</th>
+                                    <th>Конец</th>
+                                    <th>Часов</th>
                                     <th>Статус</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var record in Model.Records)
+                                @if (Model.Records.Any())
                                 {
-                                    <tr class="record-row" data-date="@record.Date.ToString("yyyy-MM-dd")">
-                                        <td>@record.Date.ToShortDateString()</td>
-                                        <td>
-                                            @if (record.ArrivalTime.HasValue)
-                                            {
-                                                @record.ArrivalTime.Value.ToShortTimeString()
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-danger">Пропуск</span>
-                                            }
-                                        </td>
-                                        <td>
-                                            @if (record.DepartureTime.HasValue)
-                                            {
-                                                @record.DepartureTime.Value.ToShortTimeString()
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-danger">Пропуск</span>
-                                            }
-                                        </td>
-                                        <td>
-                                            @if (record.Status == AttendanceStatus.Late)
-                                            {
-                                                <span class="badge bg-warning">Опоздание</span>
-                                            }
-                                            else if (record.Status == AttendanceStatus.Overwork)
-                                            {
-                                                <span class="badge bg-success">Переработка</span>
-                                            }
-                                            else if (record.Status == AttendanceStatus.Absent)
-                                            {
-                                                <span class="badge bg-danger">Пропуск</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-primary">Норма</span>
-                                            }
+                                    @foreach (var record in Model.Records.OrderByDescending(r => r.Date))
+                                    {
+                                        var hours = record.ArrivalTime.HasValue && record.DepartureTime.HasValue
+                                            ? (record.DepartureTime.Value - record.ArrivalTime.Value).TotalHours
+                                            : 0;
+
+                                        <tr>
+                                            <td>@record.Date.ToString("dd.MM.yyyy")</td>
+                                            <td>@(record.ArrivalTime?.ToString("HH:mm") ?? "-")</td>
+                                            <td>@(record.DepartureTime?.ToString("HH:mm") ?? "-")</td>
+                                            <td>@hours.ToString("F1")</td>
+                                            <td>
+                                                @if (record.Status == AttendanceStatus.Normal)
+                                                {
+                                                    <span class="badge bg-success">Норма</span>
+                                                }
+                                                else if (record.Status == AttendanceStatus.Late)
+                                                {
+                                                    <span class="badge bg-warning">Опоздание</span>
+                                                }
+                                                else if (record.Status == AttendanceStatus.Overwork)
+                                                {
+                                                    <span class="badge bg-info">Переработка</span>
+                                                }
+                                                else if (record.Status == AttendanceStatus.Absent)
+                                                {
+                                                    <span class="badge bg-danger">Отсутствие</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-3">
+                                            Нет записей о посещаемости
                                         </td>
                                     </tr>
                                 }
@@ -96,120 +192,72 @@
             </div>
         </div>
     </div>
-
-    <!-- Индивидуальный дашборд -->
-    <div class="row mt-3">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Индивидуальный дашборд за месяц</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="card text-white bg-primary mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title">Отработано часов</h5>
-                                    <p class="card-text">@Model.TotalHoursWorked.ToString("F1")</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card text-white bg-warning mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title">Опозданий</h5>
-                                    <p class="card-text">@Model.TotalLateArrivals</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card text-white bg-success mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title">Переработок</h5>
-                                    <p class="card-text">@Model.TotalOverworks</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card text-white bg-danger mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title">Пропусков</h5>
-                                    <p class="card-text">@Model.TotalAbsences</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- График посещаемости -->
-    <div class="row mt-3">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5>График отработанных часов: @Model.Employee.FullName</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="attendanceChart" height="100"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </div>
 
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Chart.js для графика -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+@if (Model.HoursWorked.Any())
+{
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Установка выбранного сотрудника в select
-            var employeeSelect = document.getElementById('employeeSelect');
-            var selectedEmployeeId = @Model.Employee.Id;
-            for (var i = 0; i < employeeSelect.options.length; i++) {
-                if (employeeSelect.options[i].value == selectedEmployeeId) {
-                    employeeSelect.selectedIndex = i;
-                    break;
-                }
-            }
-
-            // Построение графика посещаемости
-            var dates = @Html.Raw(Json.Serialize(Model.Dates));
-            var hoursWorked = @Html.Raw(Json.Serialize(Model.HoursWorked));
-
-            var ctx = document.getElementById('attendanceChart').getContext('2d');
-            var attendanceChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: dates,
-                    datasets: [{
-                        label: 'Отработанные часы',
-                        data: hoursWorked,
-                        borderColor: 'rgb(75, 192, 192)',
-                        tension: 0.1,
-                        fill: false
-                    }]
+        const ctx = document.getElementById('attendanceChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Dates)),
+                datasets: [{
+                    label: 'Часы работы',
+                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.HoursWorked)),
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#007bff',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
                 },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Часы'
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Дата'
-                            }
-                        }
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 24
                     }
                 }
-            });
+            }
         });
     </script>
 }
+
+<style>
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .employee-info p {
+        margin-bottom: 0.5rem;
+    }
+
+    .card {
+        border: none;
+        border-radius: 8px;
+    }
+
+    .card-header {
+        border-radius: 8px 8px 0 0;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+</style>

@@ -2,6 +2,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<DataService>(provider =>
+{
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    return new DataService(configuration);
+});
 
 var app = builder.Build();
 

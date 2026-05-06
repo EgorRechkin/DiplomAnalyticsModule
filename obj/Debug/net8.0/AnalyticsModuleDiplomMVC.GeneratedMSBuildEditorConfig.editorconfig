@@ -30,6 +30,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQW5hbHl0aWNzXFJlcG9ydHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/Egor/RiderProjects/AnalyticsModuleDiplomMVC/AnalyticsModuleDiplomMVC/Views/Calendar/AddEmployee.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FsZW5kYXJcQWRkRW1wbG95ZWUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Egor/RiderProjects/AnalyticsModuleDiplomMVC/AnalyticsModuleDiplomMVC/Views/Calendar/AddSchedule.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FsZW5kYXJcQWRkU2NoZWR1bGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/Egor/RiderProjects/AnalyticsModuleDiplomMVC/AnalyticsModuleDiplomMVC/Views/Calendar/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FsZW5kYXJcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
